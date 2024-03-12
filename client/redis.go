@@ -2,11 +2,12 @@ package client
 
 import (
 	"encoding/json"
+	"strconv"
+	"time"
+
 	"github.com/go-redis/redis"
 	"github.com/wangfeiso/rwlock/lua"
 	"github.com/wangfeiso/rwlock/tool"
-	"strconv"
-	"time"
 )
 
 var Redis *redis.Client
@@ -182,7 +183,7 @@ func sendLock(shaHashID, key string, uniqID, lockCmd string, expireTime int64) (
 	case UnlockCmd:
 		ret, err = Redis.EvalSha(shaHashID, []string{key, lockCmd}, []string{uniqID}).Result()
 	case RLockCmd, RUnlockCmd:
-		ret, err = Redis.EvalSha(shaHashID, []string{key, lockCmd}, []string{}).Result()
+		ret, err = Redis.EvalSha(shaHashID, []string{key, lockCmd}, []string{uniqID}).Result()
 	}
 
 	if err != nil {
