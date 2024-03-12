@@ -1,11 +1,13 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 
-	"github.com/go-redis/redis"
+	redis "github.com/go-redis/redis/v8"
 	"github.com/lzw5399/rwlock/lua"
 	"github.com/lzw5399/rwlock/tool"
 )
@@ -33,8 +35,10 @@ func DoInit(optObj interface{}) error {
 		Redis = redis.NewFailoverClient(opt)
 	case *redis.ClusterOptions:
 		Redis = redis.NewClusterClient(opt)
+	default:
+		return errors.New("unsupported options")
 	}
-	if _, err := Redis.Ping().Result(); err != nil {
+	if _, err := Redis.Ping(context.Background()).Result(); err != nil {
 		return err
 	}
 	opts = optObj
@@ -47,7 +51,7 @@ func DoInit(optObj interface{}) error {
 
 // 加载 Lua脚本
 func LoadLua() error {
-	hashID, err := Redis.ScriptLoad(lua.ScriptContent).Result()
+	hashID, err := Redis.ScriptLoad(context.Background(), lua.ScriptContent).Result()
 	if err != nil {
 		return err
 	}
@@ -186,11 +190,11 @@ func sendLock(shaHashID, key string, uniqID, lockCmd string, expireTime int64) (
 	var err error
 	switch lockCmd {
 	case LockCmd:
-		ret, err = Redis.EvalSha(shaHashID, []string{key, lockCmd}, []string{uniqID, strconv.Itoa(int(expireTime))}).Result()
+		ret, err = Redis.EvalSha(context.Background(), shaHashID, []string{key, lockCmd}, []string{uniqID, strconv.Itoa(int(expireTime))}).Result()
 	case UnlockCmd:
-		ret, err = Redis.EvalSha(shaHashID, []string{key, lockCmd}, []string{uniqID}).Result()
+		ret, err = Redis.EvalSha(context.Background(), shaHashID, []string{key, lockCmd}, []string{uniqID}).Result()
 	case RLockCmd, RUnlockCmd:
-		ret, err = Redis.EvalSha(shaHashID, []string{key, lockCmd}, []string{uniqID}).Result()
+		ret, err = Redis.EvalSha(context.Background(), shaHashID, []string{key, lockCmd}, []string{uniqID}).Result()
 	}
 
 	if err != nil {
