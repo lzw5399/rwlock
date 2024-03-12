@@ -1,7 +1,7 @@
 package rwlock
 
 import (
-	"github.com/wangfeiso/rwlock/client"
+	"github.com/lzw5399/rwlock/client"
 )
 
 // Init

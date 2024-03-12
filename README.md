@@ -3,7 +3,7 @@
 ### 使用方式
 
 ``` 
-go get github.com/wangfeiso/rwlock
+go get github.com/lzw5399/rwlock
 ```
 ### 特性说明
 
@@ -14,7 +14,7 @@ go get github.com/wangfeiso/rwlock
 
 ```
 import (
-	"github.com/wangfeiso/rwlock"
+	"github.com/lzw5399/rwlock"
 )
 
 func main() {

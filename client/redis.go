@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/wangfeiso/rwlock/lua"
-	"github.com/wangfeiso/rwlock/tool"
+	"github.com/lzw5399/rwlock/lua"
+	"github.com/lzw5399/rwlock/tool"
 )
 
 var Redis redis.UniversalClient
