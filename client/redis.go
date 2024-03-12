@@ -10,8 +10,8 @@ import (
 	"github.com/wangfeiso/rwlock/tool"
 )
 
-var Redis *redis.Client
-var opts *redis.Options
+var Redis redis.UniversalClient
+var opts interface{}
 
 // error 定义
 const NoScriptError = "NOSCRIPT No matching script. Please use EVAL."
@@ -25,12 +25,19 @@ const RUnlockCmd = "RUNLOCK"
 
 var shaHashID string
 
-func Init(opt *redis.Options) error {
-	Redis = redis.NewClient(opt)
+func DoInit(optObj interface{}) error {
+	switch opt := optObj.(type) {
+	case *redis.Options:
+		Redis = redis.NewClient(opt)
+	case *redis.FailoverOptions:
+		Redis = redis.NewFailoverClient(opt)
+	case *redis.ClusterOptions:
+		Redis = redis.NewClusterClient(opt)
+	}
 	if _, err := Redis.Ping().Result(); err != nil {
 		return err
 	}
-	opts = opt
+	opts = optObj
 
 	if err := LoadLua(); err != nil {
 		return err
@@ -225,7 +232,7 @@ func handleError(err error) bool {
 // redis重启
 // 重试初始化一次
 func handleEofError() error {
-	return Init(opts)
+	return DoInit(opts)
 }
 
 // Lua script 不存在
